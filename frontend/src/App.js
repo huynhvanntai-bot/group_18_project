@@ -22,8 +22,6 @@ function App() {
 }
 
 export default App;
-<<<<<<< HEAD
-// Code được chỉnh bởi Tài
-<h1>Xin chào các bạn, tôi là Tài</h1>
-=======
->>>>>>> frontend-huy
+<h1>Xin chào, tôi là Tài & Huy</h1>;
+<p>Đây là file App.js sau khi hợp nhất</p>
+
