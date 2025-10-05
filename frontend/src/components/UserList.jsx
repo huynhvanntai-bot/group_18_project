@@ -1,74 +1,130 @@
-// frontend/src/components/UserList.jsx
 import React, { useEffect, useState } from "react";
-import API from "../services/api.js";
-import AddUser from "./AddUser";
+import API from "../services/api";
 
-export default function UserList() {
+export default function UserList({ reload }) {
   const [users, setUsers] = useState([]);
+  const [editingUser, setEditingUser] = useState(null);
+  const [formData, setFormData] = useState({
+    ten: "",
+    email: "",
+    mssv: "",
+    lop: "",
+  });
 
+  // 🟢 Lấy danh sách user
   const fetchUsers = async () => {
     try {
       const res = await API.get("/api/users");
-      // Ghi log để kiểm tra dữ liệu nhận về
-      console.log("🌟 Dữ liệu nhận được từ API:", res.data); 
       setUsers(res.data);
     } catch (err) {
-      console.error("❌ Lỗi khi lấy dữ liệu:", err);
-      setUsers(null); 
+      console.error("Lỗi khi lấy user:", err);
     }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [reload]);
 
-  const handleUserAdded = (newUser) => {
-    setUsers((prev) => [...(prev || []), newUser]); 
+  // 🟠 Khi bấm nút Sửa
+  const handleEdit = (user) => {
+    setEditingUser(user._id);
+    setFormData({
+      ten: user.ten,
+      email: user.email,
+      mssv: user.mssv,
+      lop: user.lop,
+    });
   };
-  
-  // Bắt đầu khối hiển thị
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>📋 Danh sách User (MongoDB)</h2>
-      
-      {/* RENDER FORM ADDUSER LUÔN LUÔN Ở ĐÂY */}
-      <AddUser onUserAdded={handleUserAdded} />
-      
-      {/* Xử lý trạng thái lỗi */}
-      {users === null && (
-          <div style={{ color: 'red', padding: '10px' }}>⚠️ Đã xảy ra lỗi khi tải dữ liệu. Kiểm tra Backend Server và kết nối MongoDB.</div>
-      )}
 
-      {/* Xử lý trạng thái rỗng */}
-      {users !== null && !users.length ? (
-        <>
-          <p style={{ color: '#FFC107', fontWeight: 'bold' }}>⚠️ Hiện chưa có user nào</p>
-          <p>Hãy thử thêm user mới!</p>
-        </>
+  // 🔵 Cập nhật user (PUT)
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      await API.put(`/api/users/${editingUser}`, formData);
+      alert("Cập nhật thành công!");
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err) {
+      console.error("Lỗi khi cập nhật:", err);
+      alert("Không thể cập nhật user!");
+    }
+  };
+
+  // 🔴 Xóa user (DELETE)
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc muốn xóa user này?")) {
+      try {
+        await API.delete(`/api/users/${id}`);
+        alert("Xóa thành công!");
+        fetchUsers();
+      } catch (err) {
+        console.error("Lỗi khi xóa user:", err);
+        alert("Không thể xóa user!");
+      }
+    }
+  };
+
+  return (
+    <div>
+      {editingUser ? (
+        <form onSubmit={handleUpdate} style={{ marginBottom: 20 }}>
+          <input
+            placeholder="Tên"
+            value={formData.ten}
+            onChange={(e) => setFormData({ ...formData, ten: e.target.value })}
+          />
+          <input
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+          />
+          <input
+            placeholder="MSSV"
+            value={formData.mssv}
+            onChange={(e) => setFormData({ ...formData, mssv: e.target.value })}
+          />
+          <input
+            placeholder="Lớp"
+            value={formData.lop}
+            onChange={(e) => setFormData({ ...formData, lop: e.target.value })}
+          />
+          <button type="submit">💾 Lưu</button>
+          <button type="button" onClick={() => setEditingUser(null)}>
+            ❌ Hủy
+          </button>
+        </form>
+      ) : null}
+
+      {users.length === 0 ? (
+        <p>Không có user nào</p>
       ) : (
-        // Hiển thị danh sách nếu có dữ liệu
-        users !== null && users.length > 0 && (
-          <table border="1" cellPadding="12" style={{ marginTop: "10px", width: '100%', borderCollapse: 'collapse', borderRadius: '5px', overflow: 'hidden' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f2f2f2' }}>
-                <th style={{ textAlign: 'left' }}>Họ tên</th>
-                <th style={{ textAlign: 'left' }}>Email</th>
-                <th style={{ textAlign: 'left' }}>MSSV</th>
-                <th style={{ textAlign: 'left' }}>Lớp</th>
+        <table border="1" cellPadding="5">
+          <thead>
+            <tr>
+              <th>Tên</th>
+              <th>Email</th>
+              <th>MSSV</th>
+              <th>Lớp</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u._id}>
+                <td>{u.ten}</td>
+                <td>{u.email}</td>
+                <td>{u.mssv}</td>
+                <td>{u.lop}</td>
+                <td>
+                  <button onClick={() => handleEdit(u)}>✏️ Sửa</button>
+                  <button onClick={() => handleDelete(u._id)}>🗑️ Xóa</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users.map((u, index) => (
-                <tr key={u._id} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9f9f9' }}>
-                  <td>{u.ten}</td>
-                  <td>{u.email}</td>
-                  <td>{u.mssv}</td>
-                  <td>{u.lop}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
