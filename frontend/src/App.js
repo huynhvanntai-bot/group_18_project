@@ -38,6 +38,17 @@ function App() {
 }
 
 export default App;
+
 // code của huy
 <h1>Xin chào tôi là Huy</h1>;
 <p style={{ display: "none" }}>Code modified by Huy for PR test</p>
+
+<h1>Xin chào, tôi là Tài & Huy</h1>;
+<p>Đây là file App.js sau khi hợp nhất</p>
+
+
+// Code được chỉnh bởi Tài
+<h1>Xin chào các bạn, tôi là Tài</h1>
+
+
+

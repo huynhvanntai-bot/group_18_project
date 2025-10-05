@@ -1,25 +1,54 @@
-// controllers/userController.js
+const User = require("../models/User");
 
-let users = [
-  { id: 1, name: "Tai", email: "tai@example.com" },
-  { id: 2, name: "Vinh", email: "Vinh@example.com" },
-  { id: 3, name: "Huy", email: "Huy@example.com" }
-];
-
-// GET /users
-const getUsers = (req, res) => {
-  res.json(users);
+// Lấy toàn bộ user
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// POST /users
-const createUser = (req, res) => {
-  const newUser = {
-    id: users.length + 1,
-    name: req.body.name,
-    email: req.body.email
-  };
-  users.push(newUser);
-  res.status(201).json(newUser);
+// Tạo user mới
+exports.createUser = async (req, res) => {
+  try {
+    const { ten, email, mssv, lop } = req.body;
+
+    if (!ten || !email) {
+      return res.status(400).json({ message: "Thiếu tên hoặc email" });
+    }
+
+    const newUser = new User({ ten, email, mssv, lop });
+    const savedUser = await newUser.save();
+    res.json(savedUser);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };
 
-module.exports = { getUsers, createUser };
+// Cập nhật user
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedUser = await User.findByIdAndUpdate(id, req.body, { new: true });
+
+    if (!updatedUser) return res.status(404).json({ message: "Không tìm thấy user" });
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+// Xóa user
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) return res.status(404).json({ message: "Không tìm thấy user" });
+    res.json({ message: "Đã xóa user thành công" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
