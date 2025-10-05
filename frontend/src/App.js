@@ -22,3 +22,6 @@ function App() {
 }
 
 export default App;
+<h1>Xin chào, tôi là Tài & Huy</h1>;
+<p>Đây là file App.js sau khi hợp nhất</p>
+

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   ten: { type: String, required: true },
@@ -7,6 +7,4 @@ const userSchema = new mongoose.Schema({
   lop: { type: String },
 });
 
-const User = mongoose.model("User", userSchema);
-
-export default User; // ✅ Xuất default để import chuẩn
+module.exports = mongoose.model("User", userSchema);
