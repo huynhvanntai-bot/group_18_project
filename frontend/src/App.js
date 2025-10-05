@@ -25,3 +25,8 @@ export default App;
 <h1>Xin chào, tôi là Tài & Huy</h1>;
 <p>Đây là file App.js sau khi hợp nhất</p>
 
+<<<<<<< HEAD
+// Code được chỉnh bởi Tài
+<h1>Xin chào các bạn, tôi là Tài</h1>
+=======
+>>>>>>> 80b00bf4 (Thêm chức năng Sửa/Xóa user trên React)
