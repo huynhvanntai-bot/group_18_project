@@ -22,3 +22,5 @@ function App() {
 }
 
 export default App;
+// Code được chỉnh bởi Tài
+<h1>Xin chào các bạn, tôi là Tài</h1>
