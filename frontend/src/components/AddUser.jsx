@@ -1,7 +1,7 @@
-import { useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import API from "../services/api";
 
-function AddUser({ onUserAdded }) {
+export default function AddUser({ onUserAdded }) {
   const [ten, setTen] = useState("");
   const [email, setEmail] = useState("");
   const [mssv, setMssv] = useState("");
@@ -9,52 +9,31 @@ function AddUser({ onUserAdded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!ten || !email || !mssv || !lop) {
+      alert("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
     try {
-      await axios.post("http://localhost:5000/users", {
-        ten,
-        email,
-        mssv,
-        lop,
-      });
-
-      // Gọi lại fetchUsers ở App.jsx để reload danh sách
+      await API.post("/users", { ten, email, mssv, lop });
       onUserAdded();
-
-      // Reset form
       setTen("");
       setEmail("");
       setMssv("");
       setLop("");
     } catch (err) {
       console.error("Lỗi khi thêm user:", err);
+      alert("Không thể thêm người dùng!");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        value={ten}
-        onChange={(e) => setTen(e.target.value)}
-        placeholder="Tên"
-      />
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
-      <input
-        value={mssv}
-        onChange={(e) => setMssv(e.target.value)}
-        placeholder="MSSV"
-      />
-      <input
-        value={lop}
-        onChange={(e) => setLop(e.target.value)}
-        placeholder="Lớp"
-      />
-      <button type="submit">Thêm</button>
+    <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
+      <input placeholder="Tên" value={ten} onChange={(e) => setTen(e.target.value)} />
+      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      <input placeholder="MSSV" value={mssv} onChange={(e) => setMssv(e.target.value)} />
+      <input placeholder="Lớp" value={lop} onChange={(e) => setLop(e.target.value)} />
+      <button type="submit">➕ Thêm</button>
     </form>
   );
 }
-
-export default AddUser;
