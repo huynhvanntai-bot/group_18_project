@@ -1,23 +1,22 @@
 import React, { useState } from "react";
-import UserList from "./UserList";
-import AddUser from "./AddUser";
+import UserList from "./components/UserList";
+import AddUser from "./components/AddUser";
 
 function App() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Nguyễn Văn A" },
-    { id: 2, name: "Trần Thị B" }
-  ]);
+  const [reload, setReload] = useState(false);
 
-  const addUser = (name) => {
-    const newUser = { id: Date.now(), name };
-    setUsers([...users, newUser]);
-  };
+  // Hàm reload để gọi lại danh sách user sau khi thêm/sửa/xóa
+  const handleUserChange = () => setReload(!reload);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Quản lý User</h1>
-      <AddUser onAddUser={addUser} />
-      <UserList users={users} />
+    <div style={{ padding: 20 }}>
+      <h2>📋 Danh sách User (MongoDB)</h2>
+
+      {/* Form thêm user */}
+      <AddUser onUserAdded={handleUserChange} />
+
+      {/* Danh sách user */}
+      <UserList reload={reload} />
     </div>
   );
 }
