@@ -22,5 +22,8 @@ function App() {
 }
 
 export default App;
+<<<<<<< HEAD
 // Code được chỉnh bởi Tài
 <h1>Xin chào các bạn, tôi là Tài</h1>
+=======
+>>>>>>> frontend-huy
