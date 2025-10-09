@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const authController = require("../controllers/authController");
+const { signup, login, logout } = require("../controllers/userController");
 
-router.post("/signup", authController.signup);
-router.post("/login", authController.login);
-router.post("/logout", authController.logout);
+// Định nghĩa các API
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/logout", logout);
 
 module.exports = router;

@@ -1,27 +1,40 @@
-import React, { useState } from "react";
-import UserList from "./components/UserList";
-import AddUser from "./components/AddUser";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import "./App.css";
 
 function App() {
-  const [reload, setReload] = useState(false);
-
-  // Hàm reload để gọi lại danh sách user sau khi thêm/sửa/xóa
-  const handleUserChange = () => setReload(!reload);
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/logout", { method: "POST" });
+      const data = await res.json();
+      localStorage.removeItem("token");
+      alert(data.message || "Đăng xuất thành công!");
+    } catch (err) {
+      alert("Lỗi khi đăng xuất!");
+    }
+  };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>📋 Danh sách User (MongoDB)</h2>
+    <Router>
+      <div className="App">
+        <nav style={{ padding: "20px", background: "#f5f5f5" }}>
+          <Link to="/" style={{ marginRight: "15px" }}>Trang chủ</Link>
+          <Link to="/login" style={{ marginRight: "15px" }}>Đăng nhập</Link>
+          <Link to="/register" style={{ marginRight: "15px" }}>Đăng ký</Link>
+          <button onClick={handleLogout} style={{ marginLeft: "15px" }}>Đăng xuất</button>
+        </nav>
 
-      {/* Form thêm user */}
-      <AddUser onUserAdded={handleUserChange} />
-
-      {/* Danh sách user */}
-      <UserList reload={reload} />
-    </div>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
 export default App;
-<h1>Xin chào, tôi là Tài & Huy</h1>;
-<p>Đây là file App.js sau khi hợp nhất</p>
-
