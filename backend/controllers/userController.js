@@ -1,22 +1,30 @@
 // controllers/userController.js
 const User = require("../models/User");
 
-// Đăng ký
+// -------------------
+// 🧩 1. Đăng ký
+// -------------------
 const signup = async (req, res) => {
   res.status(501).json({ message: "Chưa triển khai signup ở userController.js" });
 };
 
-// Đăng nhập
+// -------------------
+// 🧩 2. Đăng nhập
+// -------------------
 const login = async (req, res) => {
   res.status(501).json({ message: "Chưa triển khai login ở userController.js" });
 };
 
-// Đăng xuất
+// -------------------
+// 🧩 3. Đăng xuất
+// -------------------
 const logout = (req, res) => {
   res.json({ message: "Đăng xuất thành công!" });
 };
 
-// Lấy toàn bộ user
+// -------------------
+// 🧩 4. Lấy toàn bộ user
+// -------------------
 const getUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -26,7 +34,9 @@ const getUsers = async (req, res) => {
   }
 };
 
-// Tạo user mới
+// -------------------
+// 🧩 5. Tạo user mới
+// -------------------
 const createUser = async (req, res) => {
   try {
     const { ten, email, mssv, lop } = req.body;
@@ -47,7 +57,9 @@ const createUser = async (req, res) => {
   }
 };
 
-// Cập nhật user
+// -------------------
+// 🧩 6. Cập nhật user (bằng ID)
+// -------------------
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -59,7 +71,9 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Xóa user
+// -------------------
+// 🧩 7. Xóa user
+// -------------------
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -71,7 +85,50 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// ✅ Xuất tất cả hàm ở cuối cùng
+// -------------------
+// 🆕 8. Xem thông tin cá nhân (GET /profile)
+// -------------------
+const getProfile = async (req, res) => {
+  try {
+    const email = req.query.email; // Lấy email từ query (hoặc từ token nếu có)
+    if (!email) return res.status(400).json({ message: "Thiếu email" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    res.json(user);
+  } catch (err) {
+    console.error("Lỗi khi lấy profile:", err);
+    res.status(500).json({ message: "Lỗi server khi lấy thông tin." });
+  }
+};
+
+// -------------------
+// 🆕 9. Cập nhật thông tin cá nhân (PUT /profile)
+// -------------------
+const updateProfile = async (req, res) => {
+  try {
+    const { email, ten, mssv, lop } = req.body;
+    if (!email) return res.status(400).json({ message: "Thiếu email" });
+
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
+      { ten, mssv, lop },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ message: "Không tìm thấy người dùng" });
+
+    res.json({ message: "Cập nhật thành công", user: updatedUser });
+  } catch (err) {
+    console.error("Lỗi khi cập nhật profile:", err);
+    res.status(500).json({ message: "Lỗi server khi cập nhật." });
+  }
+};
+
+// -------------------
+// ✅ Xuất tất cả hàm ra cuối cùng
+// -------------------
 module.exports = {
   signup,
   login,
@@ -80,4 +137,6 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getProfile,      // thêm mới
+  updateProfile,   // thêm mới
 };
