@@ -1,19 +1,86 @@
 // controllers/userController.js
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // -------------------
 // 🧩 1. Đăng ký
 // -------------------
 const signup = async (req, res) => {
-  res.status(501).json({ message: "Chưa triển khai signup ở userController.js" });
-};
+  try {
+    const { ten, email, password, role } = req.body;
 
+    // Kiểm tra đủ dữ liệu
+    if (!ten || !email || !password) {
+      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin!" });
+    }
+
+    // Kiểm tra email tồn tại
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email đã tồn tại!" });
+    }
+
+    // Mã hóa mật khẩu
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Tạo user mới
+    const newUser = new User({
+      ten,
+      email,
+      password: hashedPassword,
+      role: role || "user", // mặc định user
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: "Đăng ký thành công!", user: newUser });
+  } catch (error) {
+    console.error("Lỗi khi đăng ký:", error);
+    res.status(500).json({ message: "Lỗi server khi đăng ký!" });
+  }
+};
 // -------------------
 // 🧩 2. Đăng nhập
 // -------------------
 const login = async (req, res) => {
-  res.status(501).json({ message: "Chưa triển khai login ở userController.js" });
+  try {
+    const { email, password } = req.body;
+
+    // Tìm user theo email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Email không tồn tại!" });
+    }
+
+    // Kiểm tra mật khẩu
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Sai mật khẩu!" });
+    }
+
+    // Tạo token
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Đăng nhập thành công!",
+      token,
+      user: {
+        id: user._id,
+        ten: user.ten,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("💥 Lỗi chi tiết khi đăng nhập:", error); // ⚠️ Thêm dòng này
+    res.status(500).json({ message: "Lỗi server khi đăng nhập!" });
+  }
 };
+
 
 // -------------------
 // 🧩 3. Đăng xuất
@@ -27,7 +94,10 @@ const logout = (req, res) => {
 // -------------------
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    if (req.user?.role !== "admin") {
+  return res.status(403).json({ message: "Chỉ Admin mới xem được danh sách user" });
+}
+const users = await User.find();
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Không thể tải danh sách user." });
@@ -49,7 +119,7 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: "Email đã tồn tại." });
     }
 
-    const newUser = new User({ ten, email, mssv, lop });
+    const newUser = new User({ ten, email, mssv, lop, role: req.body.role || "user" });
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
   } catch (err) {

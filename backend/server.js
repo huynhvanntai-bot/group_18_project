@@ -1,22 +1,23 @@
+// backend/server.js
 require("dotenv").config();
+console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET);
+console.log("🌐 MONGO_URI:", process.env.MONGO_URI);
+
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
-
-// 🟢 import thêm dòng này
 const profileRoutes = require("./routes/profile");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🟢 Mount routes tại prefix /api
+// Mount routes
 app.use("/api", userRoutes);
 app.use("/api", authRoutes);
-
-// 🟢 Gắn route /api/profile
 app.use("/api/profile", profileRoutes);
 
 const PORT = process.env.PORT || 5000;

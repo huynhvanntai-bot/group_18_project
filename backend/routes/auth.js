@@ -1,13 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const { signup, login, logout, getProfile, updateProfile } = require("../controllers/userController");
+const {
+  signup,
+  login,
+  logout,
+  getProfile,
+  updateProfile,
+} = require("../controllers/userController");
+const { protect } = require("../middleware/authMiddleware");
 
-// Định nghĩa các API
+// ------------------- AUTH -------------------
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
 
-router.get("/profile", getProfile);
-router.put("/profile", updateProfile);
+// ------------------- PROFILE -------------------
+router.get("/profile", protect, getProfile);
+router.put("/profile", protect, updateProfile);
 
 module.exports = router;
