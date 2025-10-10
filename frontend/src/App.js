@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Admin from "./pages/AdminPage";
 import Register from "./pages/Register";
 import "./App.css";
 import Profile from "./pages/Profile";
@@ -26,6 +27,7 @@ function App() {
           <Link to="/login" style={{ marginRight: "15px" }}>Đăng nhập</Link>
           <Link to="/register" style={{ marginRight: "15px" }}>Đăng ký</Link>
           <Link to="/profile" style={{ marginRight: "15px" }}>Profile</Link>
+          <Link to="/AdminPage" style={{ marginRight: "15px" }}>Admin</Link>
           <button onClick={handleLogout} style={{ marginLeft: "15px" }}>Đăng xuất</button>
         </nav>
 
@@ -34,6 +36,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
            <Route path="/profile" element={<Profile />} />
+           <Route path="/AdminPage" element={<Admin />} />
+
         </Routes>
       </div>
     </Router>
