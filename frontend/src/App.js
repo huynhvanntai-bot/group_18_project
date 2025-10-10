@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import "./App.css";
+import Profile from "./pages/Profile";
 
 function App() {
   const handleLogout = async () => {
@@ -24,6 +25,7 @@ function App() {
           <Link to="/" style={{ marginRight: "15px" }}>Trang chủ</Link>
           <Link to="/login" style={{ marginRight: "15px" }}>Đăng nhập</Link>
           <Link to="/register" style={{ marginRight: "15px" }}>Đăng ký</Link>
+          <Link to="/profile" style={{ marginRight: "15px" }}>Profile</Link>
           <button onClick={handleLogout} style={{ marginLeft: "15px" }}>Đăng xuất</button>
         </nav>
 
@@ -31,6 +33,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+           <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
     </Router>
