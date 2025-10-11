@@ -2,6 +2,9 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+const cloudinary = require("../config/cloudinary");
 
 // -------------------
 // 🧩 1. Đăng ký
@@ -195,7 +198,108 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi cập nhật." });
   }
 };
+// ------------------------------
+// 🔹 QUÊN MẬT KHẨU (FORGOT PASSWORD)
+// ------------------------------
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
 
+    // Kiểm tra người dùng
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email không tồn tại!" });
+    }
+
+    // Tạo reset token ngẫu nhiên
+    const resetToken = crypto.randomBytes(20).toString("hex");
+
+    // Lưu token & thời hạn vào user
+    user.resetToken = resetToken;
+    user.resetTokenExpire = Date.now() + 10 * 60 * 1000; // 10 phút
+    await user.save();
+
+    // Giả lập gửi mail → chỉ log ra console
+    console.log("=====================================");
+    console.log(`🔹 Fake mail gửi đến: ${email}`);
+    console.log(`🔹 Token đặt lại mật khẩu: ${resetToken}`);
+    console.log("=====================================");
+
+    return res.status(200).json({
+      message: "Reset token created (email not configured)",
+      resetToken,
+    });
+  } catch (error) {
+    console.error("❌ Lỗi forgotPassword:", error);
+    return res.status(500).json({ message: "Lỗi server khi tạo token!" });
+  }
+};
+
+// ------------------------------
+// 🔹 ĐẶT LẠI MẬT KHẨU (RESET PASSWORD)
+// ------------------------------
+const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: "Thiếu token hoặc mật khẩu mới!" });
+    }
+
+    // Tìm user có token hợp lệ và chưa hết hạn
+    const user = await User.findOne({
+  resetToken: token.trim(),
+  resetTokenExpire: { $gt: Date.now() },
+});
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Token không hợp lệ hoặc đã hết hạn!" });
+    }
+
+    // Cập nhật mật khẩu mới
+    const bcrypt = require("bcryptjs");
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpire = undefined;
+    await user.save();
+
+    return res.status(200).json({ message: "Đặt lại mật khẩu thành công!" });
+  } catch (error) {
+    console.error("❌ Lỗi resetPassword:", error);
+    return res.status(500).json({ message: "Lỗi server khi đặt lại mật khẩu!" });
+  }
+};
+
+const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "Chưa chọn ảnh để upload!" });
+    }
+
+    // ✅ multer-storage-cloudinary tự thêm các trường sau:
+    // req.file.path → URL ảnh trên Cloudinary
+    // req.file.filename → public_id của ảnh
+    const imageUrl = req.file.path;
+    const publicId = req.file.filename;
+
+    return res.status(200).json({
+      message: "Upload avatar thành công!",
+      imageUrl, // 🔥 trả về URL để frontend hiển thị
+      publicId,
+    });
+  } catch (error) {
+    console.error("Lỗi upload avatar:", error);
+    return res.status(500).json({ message: "Lỗi server khi upload ảnh!" });
+  }
+};
+
+module.exports = {
+  uploadAvatar,
+  // các hàm khác của bạn như getUsers, createUser, ...
+};
 // -------------------
 // ✅ Xuất tất cả hàm ra cuối cùng
 // -------------------
@@ -209,4 +313,7 @@ module.exports = {
   deleteUser,
   getProfile,      // thêm mới
   updateProfile,   // thêm mới
+  forgotPassword,  // thêm mới
+  resetPassword,   // thêm mới
+  uploadAvatar     // thêm mới
 };

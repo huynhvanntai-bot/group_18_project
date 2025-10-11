@@ -8,6 +8,9 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ["admin", "user"], default: "user" },
   mssv: String,
   lop: String,
+    // 🔹 Thêm 2 trường này để reset mật khẩu
+  resetToken: { type: String },
+  resetTokenExpire: { type: Date },
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -1,9 +1,7 @@
 // backend/server.js
 require("dotenv").config();
-console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET);
-console.log("🌐 MONGO_URI:", process.env.MONGO_URI);
 
-
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -15,10 +13,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ Thêm mới – route test để kiểm tra server hoạt động
+app.get("/", (req, res) => {
+  res.send("🔥 Backend server đang hoạt động!");
+});
+
 // Mount routes
 app.use("/api", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api/profile", profileRoutes);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 5000;
 mongoose

@@ -1,7 +1,9 @@
+// backend/controllers/authController.js
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
-// Xử lý đăng ký
+// =============== ĐĂNG KÝ ===============
 exports.signup = async (req, res) => {
   try {
     console.log("Nhận request đăng ký:", req.body);
@@ -27,7 +29,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Xử lý đăng nhập
+// =============== ĐĂNG NHẬP ===============
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -44,5 +46,66 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error("❌ Lỗi đăng nhập:", error);
     res.status(500).json({ message: "Lỗi server khi đăng nhập!" });
+  }
+};
+
+// ========================================================
+// =============== QUÊN MẬT KHẨU ===========================
+// ========================================================
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(400).json({ message: "Email không tồn tại!" });
+
+    // Tạo token reset
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const expireTime = Date.now() + 10 * 60 * 1000; // 10 phút
+
+    user.resetToken = resetToken;
+    user.resetTokenExpire = expireTime;
+    await user.save();
+
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+    console.log("🔗 Link reset password:", resetLink);
+
+    res.status(200).json({
+      message: "Token reset đã được tạo. Kiểm tra console hoặc email.",
+      resetLink,
+    });
+  } catch (error) {
+    console.error("❌ Lỗi forgotPassword:", error);
+    res.status(500).json({ message: "Lỗi server khi quên mật khẩu!" });
+  }
+};
+
+// ========================================================
+// =============== ĐẶT LẠI MẬT KHẨU ========================
+// ========================================================
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpire: { $gt: Date.now() },
+    });
+
+    if (!user)
+      return res.status(400).json({ message: "Token không hợp lệ hoặc đã hết hạn!" });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    user.resetToken = undefined;
+    user.resetTokenExpire = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Đổi mật khẩu thành công!" });
+  } catch (error) {
+    console.error("❌ Lỗi resetPassword:", error);
+    res.status(500).json({ message: "Lỗi server khi đặt lại mật khẩu!" });
   }
 };
