@@ -15,7 +15,7 @@ const signup = async (req, res) => {
 
     // Kiểm tra đủ dữ liệu
     if (!ten || !email || !password) {
-      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin!" });
+      return res.status(400).json({ message: "Vui lòng nhập thong tin!" });
     }
 
     // Kiểm tra email tồn tại
