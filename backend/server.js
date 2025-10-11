@@ -1,24 +1,35 @@
+// backend/server.js
+require("dotenv").config();
+
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/auth");
+const profileRoutes = require("./routes/profile");
 
-dotenv.config();
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// Kết nối MongoDB
+// ✅ Thêm mới – route test để kiểm tra server hoạt động
+app.get("/", (req, res) => {
+  res.send("🔥 Backend server đang hoạt động!");
+});
+
+// Mount routes
+app.use("/api", userRoutes);
+app.use("/api", authRoutes);
+app.use("/api/profile", profileRoutes);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const PORT = process.env.PORT || 5000;
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Kết nối MongoDB thành công"))
-  .catch((err) => console.error("❌ Lỗi kết nối MongoDB:", err));
-
-// Routes
-app.use("/api", userRoutes);
-
-// Khởi động server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server chạy tại http://localhost:${PORT}`));
+  .then(() => {
+    console.log("✅ Kết nối MongoDB Atlas thành công");
+    app.listen(PORT, () => console.log(`🚀 Server đang chạy ở cổng ${PORT}`));
+  })
+  .catch((err) => console.log("❌ Lỗi kết nối MongoDB:", err));

@@ -1,0 +1,84 @@
+/* Home page modern style */
+.home-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+}
+
+.home-card {
+  background: #fff;
+  padding: 48px 38px;
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(108,99,255,0.10), 0 2px 8px rgba(0,0,0,0.08);
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.home-icon {
+  font-size: 3.5rem;
+  margin-bottom: 18px;
+}
+
+.home-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #5148da;
+  margin-bottom: 12px;
+}
+.home-highlight {
+  color: #6c63ff;
+  background: linear-gradient(90deg, #6c63ff 0%, #5148da 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.home-desc {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 28px;
+}
+.home-buttons {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+.home-btn {
+  padding: 13px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(108,99,255,0.10);
+}
+.home-btn.login {
+  background: linear-gradient(90deg, #6c63ff 0%, #5148da 100%);
+  color: #fff;
+}
+.home-btn.register {
+  background: linear-gradient(90deg, #5148da 0%, #6c63ff 100%);
+  color: #fff;
+}
+.home-btn:hover {
+  transform: scale(1.06);
+  filter: brightness(1.08);
+}
+nav {
+  background-color: #f8f9fa;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+nav a {
+  margin: 0 15px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: #6c63ff;
+}
