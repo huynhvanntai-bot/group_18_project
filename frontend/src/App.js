@@ -6,6 +6,9 @@ import Admin from "./pages/AdminPage";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import "./App.css";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import UploadAvatar from "./pages/UploadAvatar";
 
 function App() {
   const handleLogout = async () => {
@@ -30,6 +33,7 @@ function App() {
           <Link to="/register" style={{ marginRight: "15px" }}>Đăng ký</Link>
           <Link to="/profile" style={{ marginRight: "15px" }}>Profile</Link>
           <Link to="/AdminPage" style={{ marginRight: "15px" }}>Admin</Link>
+          <Link to="/forgot-password" style={{ marginRight: "15px" }}>Quên mật khẩu</Link>
           <button onClick={handleLogout} style={{ marginLeft: "15px" }}>
             Đăng xuất
           </button>
@@ -41,6 +45,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/AdminPage" element={<Admin />} />
+          {/* 🔽 Các trang mới */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/upload-avatar" element={<UploadAvatar />} />
         </Routes>
       </div>
     </Router>
