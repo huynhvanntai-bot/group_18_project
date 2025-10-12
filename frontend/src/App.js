@@ -1,12 +1,15 @@
+// frontend/src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
-import Admin from "./pages/AdminPage";
+import AdminPage from "./pages/AdminPage";
 import Register from "./pages/Register";
 import "./App.css";
 import Profile from "./pages/Profile";
-
+import ForgotPassword from "./pages/ForgotPassword";   // 👈 thêm
+import ResetPassword from "./pages/ResetPassword";     // 👈 thêm
+import UploadAvatar from  "./pages/UploadAvatar";
 function App() {
   const handleLogout = async () => {
     try {
@@ -35,9 +38,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-           <Route path="/profile" element={<Profile />} />
-           <Route path="/AdminPage" element={<Admin />} />
-
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/AdminPage" element={<AdminPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/upload-avatar" element={<UploadAvatar />} />
         </Routes>
       </div>
     </Router>
