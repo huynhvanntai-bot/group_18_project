@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   signup,
   login,
+  refreshAccessToken,
   logout,
   getProfile,
   updateProfile,
@@ -12,6 +13,7 @@ const { protect } = require("../middleware/authMiddleware");
 // ------------------- AUTH -------------------
 router.post("/signup", signup);
 router.post("/login", login);
+router.post("/refresh", refreshAccessToken); // ✅ Thêm route refresh token
 router.post("/logout", logout);
 
 // ------------------- PROFILE -------------------

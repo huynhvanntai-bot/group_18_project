@@ -14,15 +14,42 @@ exports.protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       req.user = await User.findById(decoded.id).select("-password"); // lưu user vào req
+      
+      if (!req.user) {
+        return res.status(401).json({ 
+          message: "Người dùng không tồn tại!",
+          code: "USER_NOT_FOUND"
+        });
+      }
+      
       next();
     } catch (error) {
       console.error("❌ Token không hợp lệ:", error);
-      return res.status(401).json({ message: "Token không hợp lệ!" });
+      
+      if (error.name === "TokenExpiredError") {
+        return res.status(401).json({ 
+          message: "Access token đã hết hạn!",
+          code: "TOKEN_EXPIRED"
+        });
+      } else if (error.name === "JsonWebTokenError") {
+        return res.status(401).json({ 
+          message: "Token không hợp lệ!",
+          code: "INVALID_TOKEN"
+        });
+      }
+      
+      return res.status(401).json({ 
+        message: "Token không hợp lệ!",
+        code: "TOKEN_ERROR"
+      });
     }
   }
 
   if (!token) {
-    return res.status(401).json({ message: "Không có token, từ chối truy cập!" });
+    return res.status(401).json({ 
+      message: "Không có token, từ chối truy cập!",
+      code: "NO_TOKEN"
+    });
   }
 };
 
