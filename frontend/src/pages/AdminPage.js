@@ -1,43 +1,51 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import "./AdminPage.css";
+import tokenService from "../services/tokenService";
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🟢 Token admin lưu sau khi đăng nhập
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUsers(res.data);
+        // ✅ Sử dụng TokenService với auto-refresh
+        const response = await tokenService.authenticatedFetch("http://localhost:5000/api/users");
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+        
+        const data = await response.json();
+        setUsers(data);
       } catch (error) {
         console.error("Lỗi khi tải danh sách user:", error);
+        if (error.message.includes('login')) {
+          // Token hết hạn và refresh thất bại, đã redirect về login
+          return;
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchUsers();
-  }, [token]);
+  }, []);
 
   // 🗑️ Xóa user
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      // ✅ Sử dụng TokenService với auto-refresh
+      const response = await tokenService.authenticatedFetch(`http://localhost:5000/api/users/${id}`, {
+        method: 'DELETE'
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+      
       setUsers(users.filter((u) => u._id !== id));
       alert("Xóa thành công!");
     } catch (error) {
