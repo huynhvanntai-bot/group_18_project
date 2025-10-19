@@ -5,12 +5,18 @@ const userSchema = new mongoose.Schema({
   ten: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-    role: { type: String, enum: ["admin", "user"], default: "user" },
+  role: { 
+    type: String, 
+    enum: ["user", "admin", "moderator"], 
+    default: "user" 
+  },
   mssv: String,
   lop: String,
-    // 🔹 Thêm 2 trường này để reset mật khẩu
+  // 🔹 Thêm 2 trường này để reset mật khẩu
   resetToken: { type: String },
   resetTokenExpire: { type: Date },
+}, {
+  timestamps: true // Tự động thêm createdAt và updatedAt
 });
 
 module.exports = mongoose.model("User", userSchema);
