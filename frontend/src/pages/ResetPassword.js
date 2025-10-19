@@ -81,7 +81,7 @@ function ResetPassword() {
 
     try {
       console.log("🔄 SV2: Submitting reset password - phamquanghuy1661");
-      const res = await fetch(`http://localhost:5000/reset-password/${token}`, {
+      const res = await fetch(`http://localhost:5000/api/reset-password/${token}`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json" 

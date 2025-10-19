@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 
 // Tạo transporter cho Gmail SMTP
 const createTransporter = () => {
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
     port: 587,
