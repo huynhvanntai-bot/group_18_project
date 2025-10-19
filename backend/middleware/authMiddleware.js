@@ -58,6 +58,46 @@ exports.adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
-    res.status(403).json({ message: "Chỉ Admin mới được truy cập!" });
+    res.status(403).json({ 
+      message: "Chỉ Admin mới được truy cập!",
+      code: "ADMIN_REQUIRED"
+    });
+  }
+};
+
+// 🆕 Middleware kiểm tra role linh hoạt - SV1: huynhvantai
+exports.checkRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Yêu cầu đăng nhập!",
+        code: "LOGIN_REQUIRED"
+      });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: `Chỉ ${allowedRoles.join(", ")} mới được truy cập!`,
+        code: "INSUFFICIENT_PERMISSIONS",
+        required: allowedRoles,
+        current: req.user.role
+      });
+    }
+
+    next();
+  };
+};
+
+// 🆕 Middleware kiểm tra quyền moderator trở lên - SV1: huynhvantai  
+exports.moderatorOrAdmin = (req, res, next) => {
+  const allowedRoles = ["moderator", "admin"];
+  if (req.user && allowedRoles.includes(req.user.role)) {
+    next();
+  } else {
+    res.status(403).json({
+      message: "Cần quyền Moderator hoặc Admin!",
+      code: "MODERATOR_OR_ADMIN_REQUIRED",
+      current: req.user?.role || "guest"
+    });
   }
 };

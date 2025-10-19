@@ -8,6 +8,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
 const profileRoutes = require("./routes/profile");
+const adminRoutes = require("./routes/adminRoutes"); // 🆕 SV1: Admin routes
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 app.use("/api", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/admin", adminRoutes); // 🆕 SV1: Admin API routes
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
