@@ -246,16 +246,33 @@ const deleteUser = async (req, res) => {
 // -------------------
 const getProfile = async (req, res) => {
   try {
-    const email = req.query.email; // Lấy email từ query (hoặc từ token nếu có)
-    if (!email) return res.status(400).json({ message: "Thiếu email" });
+    // Lấy user từ middleware protect
+    const user = req.user; // req.user đã được set bởi protect middleware
+    
+    if (!user) {
+      return res.status(404).json({ 
+        message: "Không tìm thấy người dùng",
+        code: "USER_NOT_FOUND"
+      });
+    }
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
-
-    res.json(user);
+    // Trả về thông tin user (đã loại bỏ password)
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt
+      }
+    });
   } catch (err) {
     console.error("Lỗi khi lấy profile:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy thông tin." });
+    res.status(500).json({ 
+      message: "Lỗi server khi lấy thông tin.",
+      error: err.message 
+    });
   }
 };
 

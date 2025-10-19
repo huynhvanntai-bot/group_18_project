@@ -29,14 +29,18 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <nav style={{ padding: "20px", background: "#f5f5f5" }}>
-          <Link to="/" style={{ marginRight: "15px" }}>Trang chủ</Link>
-          <Link to="/login" style={{ marginRight: "15px" }}>Đăng nhập</Link>
-          <Link to="/register" style={{ marginRight: "15px" }}>Đăng ký</Link>
-          <Link to="/profile" style={{ marginRight: "15px" }}>Profile</Link>
-          <Link to="/AdminPage" style={{ marginRight: "15px" }}>Admin</Link>
-          <Link to="/token-test" style={{ marginRight: "15px" }}>🔧 Token Test</Link>
-          <button onClick={handleLogout} style={{ marginLeft: "15px" }}>Đăng xuất</button>
+        <nav className="app-nav">
+          <div className="nav-links">
+            <Link to="/" className="nav-link">🏠 Trang chủ</Link>
+            <Link to="/login" className="nav-link">🔐 Đăng nhập</Link>
+            <Link to="/register" className="nav-link">📝 Đăng ký</Link>
+            <Link to="/profile" className="nav-link">👤 Profile</Link>
+            <Link to="/AdminPage" className="nav-link">👑 Admin</Link>
+            <Link to="/token-test" className="nav-link special">🔧 Token Test</Link>
+          </div>
+          <button onClick={handleLogout} className="logout-btn">
+            🚪 Đăng xuất
+          </button>
         </nav>
 
         <Routes>
