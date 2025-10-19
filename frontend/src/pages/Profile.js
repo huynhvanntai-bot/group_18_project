@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Profile.css";
 import tokenService from "../services/tokenService";
 
@@ -10,7 +10,56 @@ function Profile() {
 
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState("");
+  const [currentAvatar, setCurrentAvatar] = useState(""); // 🆕 SV2: Current avatar from server
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  // 🆕 SV2: Load user profile and avatar on component mount
+  useEffect(() => {
+    loadUserProfile();
+    loadUserAvatar();
+  }, []);
+
+  // 🆕 SV2: Load user profile data
+  const loadUserProfile = async () => {
+    try {
+      if (!tokenService.hasTokens()) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/profile");
+      const data = await response.json();
+
+      if (response.ok && data.user) {
+        setEmail(data.user.email || "");
+        setTen(data.user.ten || "");
+        setMssv(data.user.mssv || "");
+        setLop(data.user.lop || "");
+      }
+    } catch (err) {
+      console.error("Load profile error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🆕 SV2: Load user avatar
+  const loadUserAvatar = async () => {
+    try {
+      if (!tokenService.hasTokens()) return;
+
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/users/avatar");
+      const data = await response.json();
+
+      if (response.ok && data.data.user.avatar.url) {
+        setCurrentAvatar(data.data.user.avatar.url);
+        setPreview(data.data.user.avatar.url);
+      }
+    } catch (err) {
+      console.error("Load avatar error:", err);
+    }
+  };
 
   // --- Cập nhật thông tin cá nhân ---
   const handleUpdate = async (e) => {
@@ -49,7 +98,7 @@ function Profile() {
     if (file) setPreview(URL.createObjectURL(file));
   };
 
-  // --- Upload avatar ---
+  // --- Upload avatar với API mới ---
   const handleUploadAvatar = async (e) => {
     e.preventDefault();
     if (!avatar) return alert("Vui lòng chọn ảnh!");
@@ -63,11 +112,11 @@ function Profile() {
     formData.append("avatar", avatar);
 
     try {
-      // ✅ Sử dụng TokenService với auto-refresh cho FormData
+      // 🆕 SV2: Sử dụng API endpoint mới cho avatar
       const headers = tokenService.getAuthHeaders();
       delete headers['Content-Type']; // Để browser tự set cho FormData
 
-      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/upload-avatar", {
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/users/avatar", {
         method: "POST",
         headers: {
           'Authorization': headers.Authorization
@@ -78,7 +127,14 @@ function Profile() {
       const data = await response.json();
       if (response.ok) {
         setMessage("✅ Cập nhật ảnh đại diện thành công!");
-        setPreview(data.imageUrl); // cập nhật ảnh mới ngay
+        setCurrentAvatar(data.data.user.avatar.url);
+        setPreview(data.data.user.avatar.url);
+        
+        // Reset form
+        setAvatar(null);
+        
+        // Clear message after 3 seconds
+        setTimeout(() => setMessage(""), 3000);
       } else {
         setMessage("❌ " + (data.message || "Lỗi khi tải ảnh!"));
       }
@@ -87,6 +143,51 @@ function Profile() {
       setMessage("Lỗi kết nối server!");
     }
   };
+
+  // 🆕 SV2: Delete avatar function
+  const handleDeleteAvatar = async () => {
+    if (!currentAvatar) {
+      alert("Không có avatar để xóa!");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Bạn có chắc muốn xóa avatar hiện tại?");
+    if (!confirmDelete) return;
+
+    try {
+      if (!tokenService.hasTokens()) {
+        return alert("Không có token, vui lòng đăng nhập lại!");
+      }
+
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/users/avatar", {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setMessage("✅ Xóa avatar thành công!");
+        setCurrentAvatar("");
+        setPreview("");
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        setMessage("❌ " + (data.message || "Xóa avatar thất bại!"));
+      }
+    } catch (err) {
+      console.error("Delete avatar error:", err);
+      setMessage("❌ Lỗi kết nối server!");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-container">
@@ -134,17 +235,55 @@ function Profile() {
 
         {/* --- CỘT PHẢI: Upload ảnh đại diện --- */}
         <div className="profile-right">
-          <h3>Ảnh đại diện</h3>
-          <img
-            src={preview || "https://via.placeholder.com/150"}
-            alt="Avatar Preview"
-            className="avatar-img"
-          />
-          <input type="file" accept="image/*" onChange={handleFileChange} />
-          <button onClick={handleUploadAvatar} className="avatar-btn">
-            Tải ảnh lên
-          </button>
+          <h3>🖼️ Ảnh đại diện</h3>
+          <div className="avatar-section">
+            <img
+              src={preview || currentAvatar || "https://via.placeholder.com/150?text=No+Avatar"}
+              alt="Avatar Preview"
+              className="avatar-img"
+            />
+            
+            {/* Avatar actions */}
+            <div className="avatar-actions">
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange}
+                className="avatar-file-input"
+                id="avatar-upload"
+              />
+              <label htmlFor="avatar-upload" className="avatar-upload-label">
+                📁 Chọn ảnh
+              </label>
+              
+              <button 
+                onClick={handleUploadAvatar} 
+                className="avatar-btn upload-btn"
+                disabled={!avatar}
+              >
+                ⬆️ Tải lên
+              </button>
+              
+              {currentAvatar && (
+                <button 
+                  onClick={handleDeleteAvatar} 
+                  className="avatar-btn delete-btn"
+                >
+                  🗑️ Xóa avatar
+                </button>
+              )}
+            </div>
+          </div>
+          
           {message && <p className="avatar-message">{message}</p>}
+          
+          {/* Quick link to Upload Avatar page */}
+          <div className="avatar-link">
+            <p>💡 Hoặc sử dụng trang upload chuyên dụng:</p>
+            <a href="/upload-avatar" className="upload-page-link">
+              🚀 Trang Upload Avatar
+            </a>
+          </div>
         </div>
       </div>
     </div>
