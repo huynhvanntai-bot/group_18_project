@@ -1,5 +1,6 @@
 // controllers/userController.js
 const User = require("../models/User");
+const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -42,6 +43,18 @@ const signup = async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi đăng ký!" });
   }
 };
+
+// -------------------
+// 🔧 Helper function để tạo access token
+// -------------------
+const generateAccessToken = (userId, role) => {
+  return jwt.sign(
+    { id: userId, role },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" } // Access token ngắn hạn 15 phút
+  );
+};
+
 // -------------------
 // 🧩 2. Đăng nhập
 // -------------------
@@ -61,16 +74,23 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Sai mật khẩu!" });
     }
 
-    // Tạo token
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    // Tạo access token (ngắn hạn)
+    const accessToken = generateAccessToken(user._id, user.role);
+
+    // Lấy thông tin thiết bị
+    const deviceInfo = {
+      userAgent: req.headers["user-agent"] || "",
+      ipAddress: req.ip || req.connection.remoteAddress || ""
+    };
+
+    // Tạo refresh token (dài hạn)
+    const refreshToken = await RefreshToken.createToken(user._id, deviceInfo);
 
     res.json({
       message: "Đăng nhập thành công!",
-      token,
+      accessToken,
+      refreshToken: refreshToken.token,
+      expiresIn: 900, // 15 phút tính bằng giây
       user: {
         id: user._id,
         ten: user.ten,
@@ -79,17 +99,80 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("💥 Lỗi chi tiết khi đăng nhập:", error); // ⚠️ Thêm dòng này
+    console.error("💥 Lỗi chi tiết khi đăng nhập:", error);
     res.status(500).json({ message: "Lỗi server khi đăng nhập!" });
   }
 };
 
+// -------------------
+// 🧩 2.5. Refresh Token
+// -------------------
+const refreshAccessToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ message: "Refresh token là bắt buộc!" });
+    }
+
+    // Verify refresh token
+    const tokenDoc = await RefreshToken.verifyToken(refreshToken);
+    
+    if (!tokenDoc) {
+      return res.status(401).json({ message: "Refresh token không hợp lệ hoặc đã hết hạn!" });
+    }
+
+    // Tạo access token mới
+    const newAccessToken = generateAccessToken(tokenDoc.userId._id, tokenDoc.userId.role);
+
+    // Tùy chọn: Tạo refresh token mới (rotation)
+    const deviceInfo = {
+      userAgent: req.headers["user-agent"] || "",
+      ipAddress: req.ip || req.connection.remoteAddress || ""
+    };
+
+    // Revoke token cũ và tạo token mới để bảo mật tốt hơn
+    await tokenDoc.revoke();
+    const newRefreshToken = await RefreshToken.createToken(tokenDoc.userId._id, deviceInfo);
+
+    res.json({
+      message: "Refresh token thành công!",
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken.token,
+      expiresIn: 900, // 15 phút
+      user: {
+        id: tokenDoc.userId._id,
+        ten: tokenDoc.userId.ten,
+        email: tokenDoc.userId.email,
+        role: tokenDoc.userId.role,
+      },
+    });
+  } catch (error) {
+    console.error("💥 Lỗi khi refresh token:", error);
+    res.status(500).json({ message: "Lỗi server khi refresh token!" });
+  }
+};
 
 // -------------------
 // 🧩 3. Đăng xuất
 // -------------------
-const logout = (req, res) => {
-  res.json({ message: "Đăng xuất thành công!" });
+const logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (refreshToken) {
+      // Tìm và revoke refresh token
+      const tokenDoc = await RefreshToken.findOne({ token: refreshToken });
+      if (tokenDoc && !tokenDoc.isRevoked) {
+        await tokenDoc.revoke();
+      }
+    }
+
+    res.json({ message: "Đăng xuất thành công!" });
+  } catch (error) {
+    console.error("Lỗi khi đăng xuất:", error);
+    res.json({ message: "Đăng xuất thành công!" }); // Vẫn trả về thành công
+  }
 };
 
 // -------------------
@@ -163,16 +246,33 @@ const deleteUser = async (req, res) => {
 // -------------------
 const getProfile = async (req, res) => {
   try {
-    const email = req.query.email; // Lấy email từ query (hoặc từ token nếu có)
-    if (!email) return res.status(400).json({ message: "Thiếu email" });
+    // Lấy user từ middleware protect
+    const user = req.user; // req.user đã được set bởi protect middleware
+    
+    if (!user) {
+      return res.status(404).json({ 
+        message: "Không tìm thấy người dùng",
+        code: "USER_NOT_FOUND"
+      });
+    }
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng" });
-
-    res.json(user);
+    // Trả về thông tin user (đã loại bỏ password)
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt
+      }
+    });
   } catch (err) {
     console.error("Lỗi khi lấy profile:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy thông tin." });
+    res.status(500).json({ 
+      message: "Lỗi server khi lấy thông tin.",
+      error: err.message 
+    });
   }
 };
 
@@ -296,16 +396,13 @@ const uploadAvatar = async (req, res) => {
   }
 };
 
-module.exports = {
-  uploadAvatar,
-  // các hàm khác của bạn như getUsers, createUser, ...
-};
 // -------------------
 // ✅ Xuất tất cả hàm ra cuối cùng
 // -------------------
 module.exports = {
   signup,
   login,
+  refreshAccessToken, // thêm mới
   logout,
   getUsers,
   createUser,

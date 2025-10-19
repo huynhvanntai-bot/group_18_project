@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Profile.css";
+import tokenService from "../services/tokenService";
 
 function Profile() {
   const [email, setEmail] = useState("");
@@ -15,28 +16,23 @@ function Profile() {
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token"); // ✅ Lấy token từ localStorage
-    if (!token) {
+    // ✅ Kiểm tra token bằng TokenService
+    if (!tokenService.hasTokens()) {
       alert("Không có token, vui lòng đăng nhập lại!");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/profile", {
+      // ✅ Sử dụng TokenService với auto-refresh
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/profile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ gửi token kèm header
-        },
         body: JSON.stringify({ email, ten, mssv, lop }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (res.ok) {
+      if (response.ok) {
         alert(data.message || "Cập nhật thông tin thành công!");
-      } else if (res.status === 401) {
-        alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
       } else {
         alert(data.message || "Cập nhật thất bại!");
       }
@@ -58,27 +54,31 @@ function Profile() {
     e.preventDefault();
     if (!avatar) return alert("Vui lòng chọn ảnh!");
 
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Không có token, vui lòng đăng nhập lại!");
+    // ✅ Kiểm tra token bằng TokenService
+    if (!tokenService.hasTokens()) {
+      return alert("Không có token, vui lòng đăng nhập lại!");
+    }
 
     const formData = new FormData();
     formData.append("avatar", avatar);
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload-avatar", {
+      // ✅ Sử dụng TokenService với auto-refresh cho FormData
+      const headers = tokenService.getAuthHeaders();
+      delete headers['Content-Type']; // Để browser tự set cho FormData
+
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/upload-avatar", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ gửi token cho backend
+          'Authorization': headers.Authorization
         },
         body: formData,
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      const data = await response.json();
+      if (response.ok) {
         setMessage("✅ Cập nhật ảnh đại diện thành công!");
         setPreview(data.imageUrl); // cập nhật ảnh mới ngay
-      } else if (res.status === 401) {
-        setMessage("❌ Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
       } else {
         setMessage("❌ " + (data.message || "Lỗi khi tải ảnh!"));
       }

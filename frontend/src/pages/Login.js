@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
+import tokenService from "../services/tokenService";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,36 +14,29 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      // ✅ Sử dụng TokenService
+      const data = await tokenService.login(email, password);
+      
+      alert("Đăng nhập thành công!");
+      console.log("✅ Tokens đã được lưu:", {
+        accessToken: data.accessToken.substring(0, 30) + "...",
+        refreshToken: data.refreshToken.substring(0, 30) + "...",
+        user: data.user
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // ✅ Lưu token vào localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userEmail", email); // nếu bạn muốn lưu email luôn
-
-        alert("Đăng nhập thành công!");
-
-        // ✅ Chuyển hướng sang trang admin
-        navigate("/AdminPage");
+      // ✅ Chuyển hướng sang trang admin
+      navigate("/AdminPage");
+      
+    } catch (error) {
+      // ✅ Xử lý lỗi từ TokenService
+      if (error.message === "Email không tồn tại!") {
+        alert("❌ Email không tồn tại. Vui lòng kiểm tra lại!");
+      } else if (error.message === "Sai mật khẩu!") {
+        alert("❌ Mật khẩu không đúng. Vui lòng thử lại!");
       } else {
-        // ✅ Xử lý lỗi rõ ràng
-        if (data.message === "Email không tồn tại!") {
-          alert("❌ Email không tồn tại. Vui lòng kiểm tra lại!");
-        } else if (data.message === "Sai mật khẩu!") {
-          alert("❌ Mật khẩu không đúng. Vui lòng thử lại!");
-        } else {
-          alert(data.message || "Đăng nhập thất bại!");
-        }
+        alert("⚠️ " + error.message);
       }
-    } catch (err) {
-      alert("⚠️ Lỗi kết nối server! Vui lòng kiểm tra backend.");
-      console.error("Login Error:", err);
+      console.error("Login Error:", error);
     } finally {
       setLoading(false);
     }
