@@ -1,47 +1,26 @@
-// frontend/src/App.js
+// frontend/src/App.js - Updated with RBAC Navigation - SV2: phamquanghuy1661
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navigation from "./components/Navigation";  // 🆕 New Navigation component
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AdminPage from "./pages/AdminPage";
 import Register from "./pages/Register";
-import "./App.css";
 import Profile from "./pages/Profile";
-import ForgotPassword from "./pages/ForgotPassword";   // 👈 thêm
-import ResetPassword from "./pages/ResetPassword";     // 👈 thêm
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import UploadAvatar from  "./pages/UploadAvatar";
-import TokenTestPage from "./pages/TokenTestPage";     // 👈 thêm SV2
+import TokenTestPage from "./pages/TokenTestPage";
+import AdminUsersPage from "./pages/AdminUsersPage";  // 🆕 Admin Users Management
+import AdminStatsPage from "./pages/AdminStatsPage";  // 🆕 Admin Stats
+import "./App.css";
 import tokenService from "./services/tokenService";
 
 function App() {
-  const handleLogout = async () => {
-    try {
-      await tokenService.logout();
-      alert("Đăng xuất thành công!");
-      // Có thể redirect về trang chủ
-      window.location.href = "/";
-    } catch (err) {
-      alert("Lỗi khi đăng xuất!");
-      console.error("Logout error:", err);
-    }
-  };
-
   return (
     <Router>
       <div className="App">
-        <nav className="app-nav">
-          <div className="nav-links">
-            <Link to="/" className="nav-link">🏠 Trang chủ</Link>
-            <Link to="/login" className="nav-link">🔐 Đăng nhập</Link>
-            <Link to="/register" className="nav-link">📝 Đăng ký</Link>
-            <Link to="/profile" className="nav-link">👤 Profile</Link>
-            <Link to="/AdminPage" className="nav-link">👑 Admin</Link>
-            <Link to="/token-test" className="nav-link special">🔧 Token Test</Link>
-          </div>
-          <button onClick={handleLogout} className="logout-btn">
-            🚪 Đăng xuất
-          </button>
-        </nav>
+        <Navigation />  {/* 🆕 New RBAC Navigation */}
 
         <Routes>
           <Route path="/" element={<Home />} />
@@ -49,6 +28,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/AdminPage" element={<AdminPage />} />
+          <Route path="/admin/users" element={<AdminUsersPage />} />  {/* 🆕 */}
+          <Route path="/admin/stats" element={<AdminStatsPage />} />  {/* 🆕 */}
           <Route path="/token-test" element={<TokenTestPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
