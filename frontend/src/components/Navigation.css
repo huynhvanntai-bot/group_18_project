@@ -27,8 +27,56 @@
 .user-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   background: rgba(255,255,255,0.1);
+  padding: 8px 12px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+/* 🆕 SV2: User Avatar Styles - phamquanghuy1661 */
+.user-avatar-container {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: scale(1.05);
+}
+
+.user-avatar-placeholder {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.user-avatar-placeholder:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   padding: 6px 12px;
   border-radius: 20px;
   backdrop-filter: blur(10px);

@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "Avatar Upload API - Hoạt động 3",
+    "description": "Test Avatar Upload API endpoints cho Hoạt động 3 - Upload ảnh nâng cao",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin1@gmail.com\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Get Current User Avatar",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "description": "Copy token từ Login response"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/users/avatar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "users", "avatar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Upload Avatar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "description": "Copy token từ Login response"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "avatar",
+              "type": "file",
+              "src": "path/to/your/image.jpg",
+              "description": "Chọn file ảnh để upload"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/users/avatar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "users", "avatar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Delete Avatar",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "description": "Copy token từ Login response"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/users/avatar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "users", "avatar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Admin - Get Any User Avatar",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "description": "Admin token required"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/users/:userId/avatar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "users", ":userId", "avatar"],
+          "variable": [
+            {
+              "key": "userId",
+              "value": "USER_ID_HERE",
+              "description": "Replace với ObjectId của user khác"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "description": "Sẽ được set sau khi login"
+    }
+  ]
+}

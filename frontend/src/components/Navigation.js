@@ -7,12 +7,17 @@ import "./Navigation.css";
 const Navigation = () => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userAvatar, setUserAvatar] = useState(""); // 🆕 SV2: User avatar state
 
   useEffect(() => {
     updateUserInfo();
+    loadUserAvatar(); // 🆕 SV2: Load avatar on mount
     
     // Check auth status every second
-    const interval = setInterval(updateUserInfo, 1000);
+    const interval = setInterval(() => {
+      updateUserInfo();
+      loadUserAvatar(); // 🆕 SV2: Update avatar regularly
+    }, 5000); // Reduced frequency for avatar loading
     return () => clearInterval(interval);
   }, []);
 
@@ -22,6 +27,25 @@ const Navigation = () => {
     
     setUser(currentUser);
     setIsLoggedIn(hasTokens && currentUser);
+  };
+
+  // 🆕 SV2: Load user avatar
+  const loadUserAvatar = async () => {
+    try {
+      if (!tokenService.hasTokens()) return;
+
+      const response = await tokenService.authenticatedFetch("http://localhost:5000/api/users/avatar");
+      const data = await response.json();
+
+      if (response.ok && data.data.user.avatar.url) {
+        setUserAvatar(data.data.user.avatar.url);
+      } else {
+        setUserAvatar(""); // Clear avatar if not found
+      }
+    } catch (err) {
+      console.error("Load avatar error:", err);
+      setUserAvatar(""); // Clear avatar on error
+    }
   };
 
   const handleLogout = async () => {
@@ -82,9 +106,26 @@ const Navigation = () => {
         <span className="brand-text">🎯 RBAC System</span>
         {isLoggedIn && (
           <span className="user-info">
-            <span className="user-name">{user?.username}</span>
-            <span className={`role-badge role-${user?.role}`}>
-              {user?.role?.toUpperCase()}
+            {/* 🆕 SV2: User Avatar Display */}
+            <div className="user-avatar-container">
+              {userAvatar ? (
+                <img 
+                  src={userAvatar} 
+                  alt="User Avatar" 
+                  className="user-avatar"
+                />
+              ) : (
+                <div className="user-avatar-placeholder">
+                  👤
+                </div>
+              )}
+            </div>
+            
+            <span className="user-details">
+              <span className="user-name">{user?.username}</span>
+              <span className={`role-badge role-${user?.role}`}>
+                {user?.role?.toUpperCase()}
+              </span>
             </span>
           </span>
         )}

@@ -18,52 +18,60 @@ const seedUsers = async () => {
     // Dữ liệu mẫu với các role khác nhau
     const sampleUsers = [
       {
-        ten: "Super Admin",
-        email: "admin@example.com",
+        ten: "Admin 1",
+        email: "admin1@gmail.com", // 🔥 Email bạn quen thuộc
         password: hashedPassword,
         role: "admin",
-        mssv: "ADM001",
-        lop: "Admin"
+        mssv: "220656",
+        lop: "DH22TIN04"
+      },
+      {
+        ten: "Super Admin",
+        email: "admin@gmail.com",
+        password: hashedPassword,
+        role: "admin",
+        mssv: "****",
+        lop: "DH22TIN04"
       },
       {
         ten: "Moderator User", 
-        email: "moderator@example.com",
+        email: "moderator@gmail.com",
         password: hashedPassword,
         role: "moderator",
-        mssv: "MOD001",
-        lop: "Moderator"
+        mssv: "****",
+        lop: "DH22TIN04"
       },
       {
         ten: "Regular User",
-        email: "user@example.com", 
+        email: "user@gmail.com", 
         password: hashedPassword,
         role: "user",
-        mssv: "USR001",
-        lop: "User"
+        mssv: "****",
+        lop: "DH22TIN04"
       },
       {
         ten: "Nguyen Quoc Vinh",
-        email: "nguyenquocvinh@example.com",
+        email: "nguyenquocvinh@gmail.com",
         password: hashedPassword,
         role: "admin",
-        mssv: "SV001",
-        lop: "CNTT"
+        mssv: "223424",
+        lop: "DH22TIN04"
       },
       {
         ten: "Huynh Van Tai", 
-        email: "huynhvantai@example.com",
+        email: "huynhvantai@gmail.com",
         password: hashedPassword,
         role: "moderator",
-        mssv: "SV002",
-        lop: "CNTT"
+        mssv: "220656",
+        lop: "DH22TIN04"
       },
       {
         ten: "Pham Quang Huy",
-        email: "phamquanghuy1661@example.com",
+        email: "phamquanghuy1661@gmail.com",
         password: hashedPassword,
         role: "user",
-        mssv: "SV003",
-        lop: "CNTT"
+        mssv: "2110061",
+        lop: "DH22TIN04"
       }
     ];
     
@@ -71,9 +79,9 @@ const seedUsers = async () => {
     await User.insertMany(sampleUsers);
     
     console.log("✅ Đã thêm dữ liệu mẫu users với các role:");
-    console.log("👑 Admin: admin@example.com, nguyenquocvinh@example.com");
-    console.log("🛡️ Moderator: moderator@example.com, huynhvantai@example.com"); 
-    console.log("👤 User: user@example.com, phamquanghuy1661@example.com");
+    console.log("👑 Admin: admin1@gmail.com, admin@gmail.com, nguyenquocvinh@gmail.com");
+    console.log("🛡️ Moderator: moderator@gmail.com, huynhvantai@gmail.com"); 
+    console.log("👤 User: user@gmail.com, phamquanghuy1661@gmail.com");
     console.log("🔑 Password cho tất cả: 123456");
     
     process.exit(0);
