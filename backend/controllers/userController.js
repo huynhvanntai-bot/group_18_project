@@ -62,15 +62,23 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // RATE LIMIT + LOGGING: SV1 (huynhvantai)
+    // If rateLimit middleware attached, check if blocked by middleware earlier (it returns 429)
+
     // Tìm user theo email
     const user = await User.findOne({ email });
     if (!user) {
+      // record failure and log
+      if (req.rateLimit && typeof req.rateLimit.recordFailure === 'function') req.rateLimit.recordFailure();
+      if (req.logActivity) await req.logActivity(null, 'login_failed_no_user', { email });
       return res.status(400).json({ message: "Email không tồn tại!" });
     }
 
     // Kiểm tra mật khẩu
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      if (req.rateLimit && typeof req.rateLimit.recordFailure === 'function') req.rateLimit.recordFailure();
+      if (req.logActivity) await req.logActivity(user._id, 'login_failed', { email });
       return res.status(400).json({ message: "Sai mật khẩu!" });
     }
 
@@ -85,6 +93,10 @@ const login = async (req, res) => {
 
     // Tạo refresh token (dài hạn)
     const refreshToken = await RefreshToken.createToken(user._id, deviceInfo);
+
+    // on successful login reset rate limiter and log activity
+    if (req.rateLimit && typeof req.rateLimit.reset === 'function') req.rateLimit.reset();
+    if (req.logActivity) await req.logActivity(user._id, 'login_success', { ip: req.ip });
 
     res.json({
       message: "Đăng nhập thành công!",

@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/auth");
+const logsRoutes = require("./routes/logs");
 const profileRoutes = require("./routes/profile");
 const adminRoutes = require("./routes/adminRoutes"); // 🆕 SV1: Admin routes
 const avatarRoutes = require("./routes/avatarRoutes"); // 🆕 SV1: Avatar routes
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 // Mount routes
 app.use("/api", userRoutes);
 app.use("/api", authRoutes);
+app.use("/api/logs", logsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/admin", adminRoutes); // 🆕 SV1: Admin API routes
 app.use("/api/users/avatar", avatarRoutes); // 🆕 SV1: Avatar API routes
