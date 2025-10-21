@@ -71,7 +71,8 @@ const Navigation = () => {
       return [
         ...baseLinks,
         { to: "/login", label: "🔐 Đăng nhập", roles: ["all"] },
-        { to: "/register", label: "📝 Đăng ký", roles: ["all"] }
+        { to: "/register", label: "📝 Đăng ký", roles: ["all"] },
+        { to: "/forgot-password", label: "🔑 Quên mật khẩu", roles: ["all"] }
       ];
     }
 

@@ -33,6 +33,7 @@ function App() {
           <Route path="/token-test" element={<TokenTestPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:tokenParam" element={<ResetPassword />} /> {/* 🆕 SV2: Token from email link */}
           <Route path="/upload-avatar" element={<UploadAvatar />} />
         </Routes>
       </div>
