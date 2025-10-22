@@ -15,6 +15,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";  // 🆕 Admin Users Manage
 import AdminStatsPage from "./pages/AdminStatsPage";  // 🆕 Admin Stats
 import "./App.css";
 import tokenService from "./services/tokenService";
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -26,10 +27,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/AdminPage" element={<AdminPage />} />
-          <Route path="/admin/users" element={<AdminUsersPage />} />  {/* 🆕 */}
-          <Route path="/admin/stats" element={<AdminStatsPage />} />  {/* 🆕 */}
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/AdminPage" element={<ProtectedRoute adminOnly={true}><AdminPage /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute adminOnly={true}><AdminUsersPage /></ProtectedRoute>} />  {/* 🆕 */}
+          <Route path="/admin/stats" element={<ProtectedRoute adminOnly={true}><AdminStatsPage /></ProtectedRoute>} />  {/* 🆕 */}
           <Route path="/token-test" element={<TokenTestPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
