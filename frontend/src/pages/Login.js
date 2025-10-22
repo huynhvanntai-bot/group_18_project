@@ -22,27 +22,20 @@ function Login() {
       const resultAction = await dispatch(loginThunk({ email, password }));
       if (loginThunk.fulfilled.match(resultAction)) {
         const data = resultAction.payload;
-
+        alert("Đăng nhập thành công!");
         console.log("✅ Tokens đã được lưu:", {
           accessToken: data.accessToken?.substring(0, 30) + "...",
           refreshToken: data.refreshToken?.substring(0, 30) + "...",
           user: data.user
         });
+
+        // ✅ Chuyển hướng sau khi login (Admin nếu role admin)
+        const user = tokenService.getUser();
+        if (user?.role === 'admin') navigate('/AdminPage');
+        else navigate('/');
       } else {
         throw new Error(resultAction.payload || resultAction.error.message || 'Login failed');
       }
-      
-      alert("Đăng nhập thành công!");
-      console.log("✅ Tokens đã được lưu:", {
-        accessToken: data.accessToken.substring(0, 30) + "...",
-        refreshToken: data.refreshToken.substring(0, 30) + "...",
-        user: data.user
-      });
-
-  // ✅ Chuyển hướng sau khi login (Admin nếu role admin)
-  const user = tokenService.getUser();
-  if (user?.role === 'admin') navigate('/AdminPage');
-  else navigate('/');
       
     } catch (error) {
       // ✅ Xử lý lỗi từ TokenService
