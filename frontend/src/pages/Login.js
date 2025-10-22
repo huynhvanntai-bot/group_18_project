@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 import tokenService from "../services/tokenService";
+import { useDispatch } from 'react-redux';
+import { loginThunk } from '../features/auth/authSlice';
 
 function Login() {
   const navigate = useNavigate();
@@ -9,13 +11,26 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const dispatch = useDispatch();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // ✅ Sử dụng TokenService
-      const data = await tokenService.login(email, password);
+      // Prefer dispatching Redux thunk which uses TokenService internally
+      const resultAction = await dispatch(loginThunk({ email, password }));
+      if (loginThunk.fulfilled.match(resultAction)) {
+        const data = resultAction.payload;
+
+        console.log("✅ Tokens đã được lưu:", {
+          accessToken: data.accessToken?.substring(0, 30) + "...",
+          refreshToken: data.refreshToken?.substring(0, 30) + "...",
+          user: data.user
+        });
+      } else {
+        throw new Error(resultAction.payload || resultAction.error.message || 'Login failed');
+      }
       
       alert("Đăng nhập thành công!");
       console.log("✅ Tokens đã được lưu:", {
@@ -24,8 +39,10 @@ function Login() {
         user: data.user
       });
 
-      // ✅ Chuyển hướng sang trang admin
-      navigate("/AdminPage");
+  // ✅ Chuyển hướng sau khi login (Admin nếu role admin)
+  const user = tokenService.getUser();
+  if (user?.role === 'admin') navigate('/AdminPage');
+  else navigate('/');
       
     } catch (error) {
       // ✅ Xử lý lỗi từ TokenService
