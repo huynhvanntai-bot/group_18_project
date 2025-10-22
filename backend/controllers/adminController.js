@@ -15,7 +15,9 @@ const getAllUsers = async (req, res) => {
       filter.role = role;
     }
     if (search) {
+      // match against both 'ten' and 'username' (some parts of the app use one or the other)
       filter.$or = [
+        { ten: { $regex: search, $options: "i" } },
         { username: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } }
       ];
@@ -78,8 +80,11 @@ const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
+    // Note: the User schema requires 'ten' (display name). Some front-end code sends 'username'.
+    // Set both fields so validation passes and older code remains compatible.
     const newUser = new User({
       username,
+      ten: username || "",
       email,
       password: hashedPassword,
       role
@@ -108,7 +113,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { username, email, role, password } = req.body;
+  const { username, email, role, password } = req.body;
 
     // Check if user exists
     const user = await User.findById(id);
@@ -120,7 +125,10 @@ const updateUser = async (req, res) => {
 
     // Prepare update data
     const updateData = {};
-    if (username) updateData.username = username;
+    if (username) {
+      updateData.username = username;
+      updateData.ten = username; // keep 'ten' in sync with 'username'
+    }
     if (email) updateData.email = email;
     if (role) updateData.role = role;
     
