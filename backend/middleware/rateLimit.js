@@ -46,7 +46,7 @@ function rateLimitMiddleware(options = {}) {
 
     // If either blocked, reject
     if (isBlocked(ipEntry) || (emailEntry && isBlocked(emailEntry))) {
-      return res.status(429).json({ success: false, message: 'Too many attempts. Try again later.' });
+      return res.status(429).json({ 'success': false, 'message': 'Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau 1 phút.' });
     }
 
     // Expose helper for controller

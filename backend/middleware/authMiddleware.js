@@ -101,3 +101,7 @@ exports.moderatorOrAdmin = (req, res, next) => {
     });
   }
 };
+
+// Backwards-compatible aliases used in some routes
+exports.verifyToken = exports.protect;
+exports.isAdmin = exports.adminOnly;
