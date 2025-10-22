@@ -50,7 +50,7 @@ const uploadUserAvatar = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Upload avatar thành công!",
+        message: "avarta thành công",
       data: {
         user: {
           _id: user._id,
