@@ -12,13 +12,24 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
+      console.log('Register payload:', { ten, email, password });
       const res = await api.post("/signup", { ten, email, password });
+      console.log('Register response:', res && res.data);
       alert("✅ Đăng ký thành công!");
-      console.log(res.data);
       navigate("/login");
     } catch (err) {
-      console.error(err);
-      alert("❌ Đăng ký thất bại, vui lòng thử lại!");
+      // More detailed error logging for debugging
+      console.error('Register error:', err);
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+        alert(`❌ Đăng ký thất bại: ${err.response.data?.message || err.response.status}`);
+      } else if (err.request) {
+        console.error('No response received:', err.request);
+        alert('❌ Đăng ký thất bại: không nhận được phản hồi từ server');
+      } else {
+        alert('❌ Đăng ký thất bại: ' + err.message);
+      }
     }
   };
 

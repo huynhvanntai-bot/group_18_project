@@ -1,39 +1,42 @@
+// frontend/src/App.js - Updated with RBAC Navigation - SV2: phamquanghuy1661
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navigation from "./components/Navigation";  // 🆕 New Navigation component
+import DebugBanner from './components/DebugBanner';
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import AdminPage from "./pages/AdminPage";
 import Register from "./pages/Register";
-import "./App.css";
 import Profile from "./pages/Profile";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import UploadAvatar from  "./pages/UploadAvatar";
+import TokenTestPage from "./pages/TokenTestPage";
+import AdminUsersPage from "./pages/AdminUsersPage";  // 🆕 Admin Users Management
+import AdminStatsPage from "./pages/AdminStatsPage";  // 🆕 Admin Stats
+import "./App.css";
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const handleLogout = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/logout", { method: "POST" });
-      const data = await res.json();
-      localStorage.removeItem("token");
-      alert(data.message || "Đăng xuất thành công!");
-    } catch (err) {
-      alert("Lỗi khi đăng xuất!");
-    }
-  };
-
   return (
     <Router>
       <div className="App">
-        <nav style={{ padding: "20px", background: "#f5f5f5" }}>
-          <Link to="/" style={{ marginRight: "15px" }}>Trang chủ</Link>
-          <Link to="/login" style={{ marginRight: "15px" }}>Đăng nhập</Link>
-          <Link to="/register" style={{ marginRight: "15px" }}>Đăng ký</Link>
-          <Link to="/profile" style={{ marginRight: "15px" }}>Profile</Link>
-          <button onClick={handleLogout} style={{ marginLeft: "15px" }}>Đăng xuất</button>
-        </nav>
+        <Navigation />  {/* 🆕 New RBAC Navigation */}
+  <DebugBanner />
 
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/AdminPage" element={<ProtectedRoute adminOnly={true}><AdminPage /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute adminOnly={true}><AdminUsersPage /></ProtectedRoute>} />  {/* 🆕 */}
+          <Route path="/admin/stats" element={<ProtectedRoute allowedRoles={['moderator','admin']}><AdminStatsPage /></ProtectedRoute>} />  {/* 🆕 */}
+          <Route path="/token-test" element={<TokenTestPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:tokenParam" element={<ResetPassword />} /> {/* 🆕 SV2: Token from email link */}
+          <Route path="/upload-avatar" element={<UploadAvatar />} />
         </Routes>
       </div>
     </Router>
