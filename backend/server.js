@@ -13,8 +13,23 @@ const adminRoutes = require("./routes/adminRoutes"); // 🆕 SV1: Admin routes
 const avatarRoutes = require("./routes/avatarRoutes"); // 🆕 SV1: Avatar routes
 
 const app = express();
-app.use(cors());
+// Prefer FRONTEND_URL from environment; fall back to the known Vercel domains for safety.
+const FRONTEND_URL = process.env.FRONTEND_URL || process.env.FRONTEND_HOST || null;
+const defaultOrigins = [
+  'https://group-18-project.vercel.app',
+  'https://group-18-project-git-main-huynhvantais-projects.vercel.app',
+];
+const corsOrigin = FRONTEND_URL ? FRONTEND_URL : defaultOrigins;
+app.use(
+  cors({
+    origin: corsOrigin,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ✅ Thêm mới – route test để kiểm tra server hoạt động
 app.get("/", (req, res) => {
@@ -39,3 +54,8 @@ mongoose
     app.listen(PORT, () => console.log(`🚀 Server đang chạy ở cổng ${PORT}`));
   })
   .catch((err) => console.log("❌ Lỗi kết nối MongoDB:", err));
+
+// Log unhandled promise rejections to aid debugging in production
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
