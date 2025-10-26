@@ -37,20 +37,28 @@ const uploadUserAvatar = async (req, res) => {
     // Upload avatar mới lên Cloudinary
     const uploadResult = await uploadAvatar(imageBuffer, userId);
     
-    // Update user với avatar mới
-    user.avatar = {
-      url: uploadResult.url,
-      publicId: uploadResult.publicId,
-      uploadedAt: new Date()
-    };
-    
-    await user.save();
+    // Update user với avatar mới.
+    // Use a direct update to avoid triggering full-document validation which may fail
+    // if other required fields (e.g. `ten`) are missing or empty in the database.
+    const updated = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          'avatar.url': uploadResult.url,
+          'avatar.publicId': uploadResult.publicId,
+          'avatar.uploadedAt': new Date()
+        }
+      },
+      { new: true, runValidators: false }
+    );
+    // reflect updated user for response
+    user.avatar = updated.avatar;
 
     console.log(`✅ Avatar uploaded successfully for user ${userId}`);
 
     res.status(200).json({
       success: true,
-      message: "Upload avatar thành công!",
+        message: "avarta thành công",
       data: {
         user: {
           _id: user._id,

@@ -1,0 +1,4 @@
+Redeploy requested to force a fresh build on Vercel.
+Timestamp: 2025-10-26T17:06:00+07:00
+
+This file is intentionally small and used only to trigger a rebuild (cache-bust).

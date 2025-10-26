@@ -97,7 +97,7 @@ curl -X POST "http://localhost:5000/api/reset-password" -H "Content-Type: applic
 
 curl:
 ```powershell
-curl -X GET "http://localhost:5000/api/admin/logs" -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>"
+curl -X GET "http://localhost:5000/api/logs" -H "Authorization: Bearer <ADMIN_ACCESS_TOKEN>"
 ```
 
 8) Create user (admin)

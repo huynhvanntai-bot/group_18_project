@@ -31,27 +31,59 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-// Middleware for single avatar upload
-const uploadAvatar = upload.single("avatar");
+// Middleware for avatar upload
+// Accept both correct key 'avatar' and a common misspelling 'avarta' to be forgiving for clients/tests
+const uploadFields = upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'avarta', maxCount: 1 }
+]);
+
+// Wrapper to normalize req.file for downstream handlers (controllers expect req.file)
+const uploadAvatar = (req, res, next) => {
+  uploadFields(req, res, function (err) {
+    if (err) return next(err);
+
+    // If multer populated files under req.files, normalize to req.file so controllers work unchanged
+    if (!req.file && req.files) {
+      if (req.files.avatar && req.files.avatar.length > 0) {
+        req.file = req.files.avatar[0];
+      } else if (req.files.avarta && req.files.avarta.length > 0) {
+        // accept misspelled field
+        req.file = req.files.avarta[0];
+      }
+    }
+
+    next();
+  });
+};
 
 // Error handling middleware cho multer
 const handleUploadError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
+    // File too large
     if (error.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         success: false,
         message: "File quá lớn! Vui lòng chọn file nhỏ hơn 5MB."
       });
     }
+    // Too many files
     if (error.code === "LIMIT_FILE_COUNT") {
       return res.status(400).json({
         success: false,
         message: "Chỉ được upload 1 file!"
       });
     }
+    // Unexpected field (wrong form key)
+    if (error.code === 'LIMIT_UNEXPECTED_FILE' || (error.message && error.message.includes('Unexpected field'))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tên field không hợp lệ. Vui lòng dùng key form-data là "avatar" (type=file).'
+      });
+    }
   }
-  
-  if (error.message.includes("Chỉ cho phép upload file ảnh")) {
+
+  if (error && error.message && error.message.includes("Chỉ cho phép upload file ảnh")) {
     return res.status(400).json({
       success: false,
       message: error.message

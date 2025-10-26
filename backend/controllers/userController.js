@@ -121,7 +121,40 @@ const login = async (req, res) => {
 // -------------------
 const refreshAccessToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    // Debug: log where the refresh token appears (masked) to help troubleshoot Postman 401
+    try {
+      const authHeader = req.headers && req.headers.authorization ? req.headers.authorization : null;
+      const authPreview = authHeader ? (authHeader.length > 30 ? authHeader.slice(0, 30) + '...' : authHeader) : null;
+      const bodyHas = !!(req.body && req.body.refreshToken);
+      const bodyPreview = bodyHas ? (String(req.body.refreshToken).slice(0, 30) + '...') : null;
+      const queryHas = !!(req.query && req.query.refreshToken);
+      const xRefreshHas = !!(req.headers && req.headers['x-refresh-token']);
+      console.log('[DEBUG] refreshAccessToken called - authHeader:', !!authHeader, 'authPreview:', authPreview, 'bodyHas:', bodyHas, 'bodyPreview:', bodyPreview, 'queryHas:', queryHas, 'xRefreshHas:', xRefreshHas);
+    } catch (dbgErr) {
+      console.log('[DEBUG] refreshAccessToken logging error:', dbgErr && dbgErr.message);
+    }
+
+    // Accept refresh token from multiple possible locations to support Postman 'Bearer' field
+    let refreshToken = null;
+
+    // 1) From JSON body { refreshToken }
+    if (req.body && req.body.refreshToken) refreshToken = req.body.refreshToken;
+
+    // 2) From Authorization: Bearer <token>
+    if (!refreshToken && req.headers && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2) refreshToken = parts[1];
+    }
+
+    // 3) From x-refresh-token header (custom)
+    if (!refreshToken && req.headers && req.headers['x-refresh-token']) {
+      refreshToken = req.headers['x-refresh-token'];
+    }
+
+    // 4) From query string ?refreshToken=...
+    if (!refreshToken && req.query && req.query.refreshToken) {
+      refreshToken = req.query.refreshToken;
+    }
 
     if (!refreshToken) {
       return res.status(400).json({ message: "Refresh token là bắt buộc!" });
@@ -129,7 +162,6 @@ const refreshAccessToken = async (req, res) => {
 
     // Verify refresh token
     const tokenDoc = await RefreshToken.verifyToken(refreshToken);
-    
     if (!tokenDoc) {
       return res.status(401).json({ message: "Refresh token không hợp lệ hoặc đã hết hạn!" });
     }
@@ -139,8 +171,8 @@ const refreshAccessToken = async (req, res) => {
 
     // Tùy chọn: Tạo refresh token mới (rotation)
     const deviceInfo = {
-      userAgent: req.headers["user-agent"] || "",
-      ipAddress: req.ip || req.connection.remoteAddress || ""
+      userAgent: req.headers['user-agent'] || '',
+      ipAddress: req.ip || req.connection?.remoteAddress || ''
     };
 
     // Revoke token cũ và tạo token mới để bảo mật tốt hơn
@@ -148,20 +180,20 @@ const refreshAccessToken = async (req, res) => {
     const newRefreshToken = await RefreshToken.createToken(tokenDoc.userId._id, deviceInfo);
 
     res.json({
-      message: "Refresh token thành công!",
+      message: 'Refresh token thành công!',
       accessToken: newAccessToken,
       refreshToken: newRefreshToken.token,
-      expiresIn: 900, // 15 phút
+      expiresIn: 900,
       user: {
         id: tokenDoc.userId._id,
         ten: tokenDoc.userId.ten,
         email: tokenDoc.userId.email,
-        role: tokenDoc.userId.role,
-      },
+        role: tokenDoc.userId.role
+      }
     });
   } catch (error) {
-    console.error("💥 Lỗi khi refresh token:", error);
-    res.status(500).json({ message: "Lỗi server khi refresh token!" });
+    console.error('💥 Lỗi khi refresh token:', error);
+    res.status(500).json({ message: 'Lỗi server khi refresh token!' });
   }
 };
 
@@ -398,7 +430,7 @@ const uploadAvatar = async (req, res) => {
     const publicId = req.file.filename;
 
     return res.status(200).json({
-      message: "Upload avatar thành công!",
+      message: "avarta thành công",
       imageUrl, // 🔥 trả về URL để frontend hiển thị
       publicId,
     });
