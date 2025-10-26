@@ -19,6 +19,15 @@ const defaultOrigins = [
   'https://group-18-project.vercel.app',
   'https://group-18-project-git-main-huynhvantais-projects.vercel.app',
 ];
+
+// Allow localhost during development so the local CRA dev server can talk to the deployed
+// backend without CORS issues. In production we'll only allow the configured FRONTEND_URL
+// or the Vercel domains above.
+if (process.env.NODE_ENV !== 'production') {
+  defaultOrigins.push('http://localhost:3000');
+  defaultOrigins.push('http://127.0.0.1:3000');
+}
+
 const corsOrigin = FRONTEND_URL ? FRONTEND_URL : defaultOrigins;
 app.use(
   cors({
